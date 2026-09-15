@@ -66,7 +66,7 @@ public class SetupActivity extends Activity {
         resLabel = new TextView(this);
         root.addView(resLabel);
         resSeek = new SeekBar(this);
-        resSeek.setMax(100);
+        resSeek.setMax(50); // 0.50..1.00 (matches native clamp)
         resSeek.setProgress(Math.round((GameFiles.getResScale(this) - 0.5f) * 100f));
         resSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar s, int p, boolean fromUser) {
@@ -127,16 +127,20 @@ public class SetupActivity extends Activity {
 
     private void updateResLabel() {
         float scale = 0.5f + resSeek.getProgress() / 100f;
-        resLabel.setText(String.format("Escala de resolução: %.2f (dinâmica)", scale));
+        if (scale > 1.0f) scale = 1.0f;
+        resLabel.setText(String.format("Escala de resolução: %.2f (dinâmica, FBO em G-5)", scale));
     }
 
     private void refreshFolderLabel() {
         String u = GameFiles.getTreeUri(this);
         String p = GameFiles.getGamePath(this);
+        String label = GameFiles.prefs(this).getString(GameFiles.KEY_VALID_LABEL, null);
         if ((u == null || u.isEmpty()) && (p == null || p.isEmpty())) {
             folderLabel.setText("Pasta: (não selecionada)");
+        } else if (label != null) {
+            folderLabel.setText("Pasta válida (" + label + ")");
         } else {
-            folderLabel.setText("Pasta: " + (u != null && !u.isEmpty() ? u : p));
+            folderLabel.setText("Pasta: " + (u != null && !u.isEmpty() ? u : p) + " (não validada)");
         }
     }
 
@@ -151,10 +155,18 @@ public class SetupActivity extends Activity {
                             Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 } catch (Exception ignored) {}
                 GameFiles.setTreeUri(this, uri);
-                // Best-effort real path for native code that prefers POSIX paths.
-                GameFiles.setGamePath(this, uri.toString());
+                // Validate the tree NOW (media/ or default.xex at root).
+                String label = GameFiles.validateTree(this, uri.toString());
+                if (label != null) {
+                    GameFiles.prefs(this).edit().putString(GameFiles.KEY_VALID_LABEL, label).apply();
+                    try { NativeBridge.nativeSetAssetValidated(true, label); } catch (Throwable ignored) {}
+                    Toast.makeText(this, "Pasta válida: " + label, Toast.LENGTH_LONG).show();
+                } else {
+                    GameFiles.prefs(this).edit().remove(GameFiles.KEY_VALID_LABEL).apply();
+                    try { NativeBridge.nativeSetAssetValidated(false, ""); } catch (Throwable ignored) {}
+                    Toast.makeText(this, "Pasta sem media/ nem default.xex — escolha a raiz do jogo.", Toast.LENGTH_LONG).show();
+                }
                 refreshFolderLabel();
-                Toast.makeText(this, "Pasta registrada.", Toast.LENGTH_SHORT).show();
             }
         }
     }

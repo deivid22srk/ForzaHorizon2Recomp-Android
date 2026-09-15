@@ -25,7 +25,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private SurfaceView surfaceView;
     private VirtualPadView padView;
     private TextView statusView;
-    private boolean surfaceReady;
+    private final Runnable statusTick = new Runnable() {
+        @Override public void run() { refreshStatus(); }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,10 +73,21 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             NativeBridge.nativeInit(path, getCacheDir().getAbsolutePath(), GameFiles.getApi(this));
             NativeBridge.nativeSetResolutionScale(GameFiles.getResScale(this));
             NativeBridge.nativeSetTargetFps(GameFiles.getTargetFps(this));
+            // Re-validate the stored tree for this process (content:// needs
+            // Java-side validation; native cannot stat it).
+            String label = GameFiles.validateTree(this, treeUri != null ? treeUri : gamePath);
+            NativeBridge.nativeSetAssetValidated(label != null, label != null ? label : "");
         } catch (UnsatisfiedLinkError e) {
             statusView.setText("Native lib ausente: " + e.getMessage());
         }
         refreshStatus();
+    }
+
+    @Override
+    protected void onDestroy() {
+        statusView.removeCallbacks(statusTick);
+        try { NativeBridge.nativeShutdown(); } catch (Throwable ignored) {}
+        super.onDestroy();
     }
 
     private void refreshStatus() {
@@ -83,7 +96,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         } catch (Throwable t) {
             statusView.setText("status indisponível");
         }
-        statusView.postDelayed(this::refreshStatus, 3000);
+        statusView.postDelayed(statusTick, 3000);
     }
 
     private void hideSystemUi() {
@@ -98,7 +111,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
 
     @Override public void surfaceCreated(SurfaceHolder holder) {
         try { NativeBridge.nativeOnSurfaceCreated(holder.getSurface()); } catch (Throwable ignored) {}
-        surfaceReady = true;
     }
 
     @Override public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -106,7 +118,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     @Override public void surfaceDestroyed(SurfaceHolder holder) {
-        surfaceReady = false;
         try { NativeBridge.nativeOnSurfaceDestroyed(); } catch (Throwable ignored) {}
     }
 

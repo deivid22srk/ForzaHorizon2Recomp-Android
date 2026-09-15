@@ -166,7 +166,8 @@ public class VirtualPadView extends View {
                 Math.round(stickDx * 1000f),
                 Math.round(throttle * 1000f),
                 Math.round(brake * 1000f),
-                buttons);
+                buttons,
+                NativeBridge.SRC_TOUCH);
     }
 
     public void reset() {
