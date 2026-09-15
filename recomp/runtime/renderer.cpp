@@ -1,10 +1,12 @@
 // renderer.cpp — GLES 3.1 bootstrap + Vulkan-ready abstraction.
-// The Xenos shader path (XenosRecomp -> DXC -> SPIR-V) plugs into
-// Renderer_Frame once recompiled shaders exist; until then we clear + present
-// so lifecycle, dynamic resolution and HUD can be validated on-device.
+// The Xenos shader path (XenosRecomp -> HLSL -> DXC -> SPIR-V, backlog G-1/G-4)
+// plugs into Renderer_Frame once recompiled shaders exist; until then we
+// clear + present so lifecycle, HUD and perf paths are testable on-device.
+// Dynamic resolution needs an FBO to be real (backlog G-5): until then the
+// scale is stored, reported, and applied to geometry once it lands — the
+// full surface is always cleared so no garbage borders appear.
 #include "renderer.h"
 #include "fh2_config.h"
-#include "shader_cache.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -71,24 +73,18 @@ bool init_gles() {
 
 void Renderer_SetApiPreference(int pref) { g_api_pref = pref; }
 
-bool Renderer_Init(void* window, const std::string& cache_dir) {
+bool Renderer_Init(void* window) {
     std::lock_guard<std::mutex> l(g_mu);
     g_window = (ANativeWindow*)window;
-    ShaderCache_Init(cache_dir + "/fh2_shaders", Config().mem.shader_cache_max_mb);
     g_last = std::chrono::steady_clock::now();
 
     bool want_vk = (g_api_pref == 0 && has_vulkan_loader()) || g_api_pref == 1;
     if (want_vk) {
-        // Vulkan backend (Turnip/Adreno) lands in renderer_vulkan.cpp.
-        // Fall through to GLES until the first SPIR-V cache ships, but
-        // report intent so status/telemetry is honest.
-        LOGI("Vulkan requested/available — using GLES bootstrap until SPIR-V cache lands");
+        // Honest bootstrap: preference stored, Vulkan backend pending (G-1).
+        LOGI("Vulkan preferred but backend pending (G-1) — GLES 3.1 bootstrap active");
     }
     if (!init_gles()) { LOGW("GLES init failed"); g_backend = Backend::None; return false; }
-    g_backend = want_vk ? Backend::Vulkan : Backend::GLES;
-    // NOTE: we report Vulkan when preferred+present even while bootstrapping
-    // on GLES, so QA can track the migration. Frame path is GLES for now.
-    if (want_vk) g_backend = Backend::Vulkan;
+    g_backend = Backend::GLES;
     return true;
 }
 
@@ -102,7 +98,6 @@ void Renderer_Shutdown() {
     }
     g_dpy = EGL_NO_DISPLAY; g_surf = EGL_NO_SURFACE; g_ctx = EGL_NO_CONTEXT;
     g_backend = Backend::None;
-    ShaderCache_Shutdown();
 }
 
 void Renderer_SetSurface(void* window) {
@@ -152,8 +147,11 @@ void Renderer_Frame() {
     int rw = (int)(g_w * Config().resolution_scale);
     int rh = (int)(g_h * Config().resolution_scale);
     if (rw < 8) rw = 8; if (rh < 8) rh = 8;
+    (void)rw; (void)rh; // consumed by geometry once it lands (backlog G-5)
     eglMakeCurrent(g_dpy, g_surf, g_surf, g_ctx);
-    glViewport(0, 0, rw, rh);
+    // Always clear the FULL surface: without an FBO the scaled viewport would
+    // leave garbage borders (no geometry exists yet to fill them).
+    glViewport(0, 0, g_w, g_h);
     // Boot gradient (day-sky placeholder) so first-launch screenshots are sane.
     g_time += (float)dt;
     float t = (sinf(g_time * 0.2f) * 0.5f + 0.5f);
@@ -166,9 +164,10 @@ Backend Renderer_Backend() { return g_backend; }
 
 std::string Renderer_Status() {
     char b[256];
-    const char* be = g_backend == Backend::Vulkan ? "Vulkan(boot:GLES)"
+    const char* be = g_backend == Backend::Vulkan ? "Vulkan"
         : g_backend == Backend::GLES ? "GLES3.1" : "none";
-    snprintf(b, sizeof(b), "gpu=%s fps=%.0f scale=%.2f %dx%d", be, g_fps_ema,
+    const char* pref = g_api_pref == 1 ? "vk-pref" : g_api_pref == 2 ? "gles-pref" : "auto";
+    snprintf(b, sizeof(b), "gpu=%s(%s) fps=%.0f scale=%.2f %dx%d", be, pref, g_fps_ema,
              Config().resolution_scale, g_w, g_h);
     return b;
 }
