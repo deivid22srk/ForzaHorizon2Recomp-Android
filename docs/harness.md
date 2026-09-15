@@ -55,6 +55,13 @@ expects — the same runtime work tracked as R-3 in `docs/backlog.md`.
 ## Status
 
 - Recompiled guest **runs** on host (real execution, not a stub).
+- Loader shim added (`RtlImageXexHeaderField` + seeded module/header). With
+  correct absolute VAs the CRT now reaches its own launch gate
+  (`sub_82BFFCF0` -> `sub_82BFFC18`) and, because `_xstart` overwrites the
+  loader globals before the gate reads them, still takes the
+  `HalReturnToFirmware(1)` abort path. Fixing this requires the kernel to
+  populate those globals in response to the guest's own init calls (the R-3
+  runtime), not pre-seeding.
 - 375 kernel imports still logging stubs (`harness/stubs.cpp`, generated from
   `tools/imports_*.txt`); 13 have real shims (heap, critical sections, pool,
   firmware-return) in `harness/kernel_stubs.cpp`.
