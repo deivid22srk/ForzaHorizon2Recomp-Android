@@ -1,0 +1,46 @@
+# Android / Gradle
+build/
+.gradle/
+local.properties
+.idea/
+*.iml
+.cxx/
+*.apk
+*.aab
+
+# NDK / CMake host artifacts
+out/
+thirdparty/
+cmake-build-*/
+
+# XenonRecomp working files (local only, game-derived)
+default.xex
+default_patched.xex
+*.xex
+*.iso
+*.xiso
+*.stfs
+game/
+private/
+
+# Generated recomp output is recreated by tools/run_recomp.sh
+recomp/generated/*.cpp
+recomp/generated/*.h
+recomp/generated/*.o
+
+# Game assets must never be committed
+media/
+audio/
+cars/
+*.zip
+
+# Secrets — use GitHub Actions secrets, never files
+*.jks
+*.keystore
+keystore.properties
+.env
+*token*
+
+# OS
+.DS_Store
+Thumbs.db
