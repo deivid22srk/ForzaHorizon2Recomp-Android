@@ -6,8 +6,10 @@ No D3D12/Windows path exists in this repo by design.
 
 `SetupActivity` stores `gfx_api`: Auto (default) = Vulkan if
 `libvulkan.so` loads (Adreno stock or Turnip), else GLES 3.1+.
-`Renderer_Init` probes and reports `gpu=Vulkan(boot:GLES)` while the SPIR-V
-cache is being built, so telemetry stays honest during migration.
+The preference is **stored, not yet honored**: `Renderer_Backend()` reports
+`GLES3.1` and the status line shows `gpu=GLES3.1(auto)` until the Vulkan
+backend lands (backlog G-1). The old `Vulkan(boot:GLES)` label was removed
+for reporting a backend that does not execute yet.
 
 ## FH2-specific load
 
@@ -17,8 +19,14 @@ cache is being built, so telemetry stays honest during migration.
   mobile path batches by shader key (XenosRecomp output) — see backlog G-2.
 - **Realtime reflections / day-night**: reflection probes + shadow cascades
   scale with `draw_distance` (0.4..1.5) and `shadow_quality` (0/1/2).
-- **Dynamic resolution**: 0.50..1.00 around base 0.85, servoed to 30/60 fps
-  target (`Renderer_Frame`). Resolution scale + fps target are user options.
+- **Dynamic resolution**: scale 0.50..1.00 around base 0.85, servoed to the
+  30/60 fps target (`Renderer_Frame`). Without an FBO the scale is stored,
+  reported and applied to geometry once it lands (backlog G-5); the full
+  surface is always cleared so no garbage borders appear.
+- **Draw distance / shadows**: `draw_distance` (0.4..1.5) and `shadow_quality`
+  (0/1/2) are stored in `RuntimeConfig` and exposed to the guest world manager
+  once R-1 lands; the streaming LOD heuristic already consumes the draw
+  multiplier. Not silently dropped — pending consumer, tracked as G-3.
 - **Shader cache**: `ShaderCache_*` persists PSO/SPIR-V under app cache,
   capped, FNV-hashed keys — no per-launch recompile of FH2's 100s of variants.
 

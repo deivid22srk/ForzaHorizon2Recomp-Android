@@ -65,8 +65,9 @@ export GH_TOKEN=<seu PAT com Contents:Read>
 ## CI
 
 `.github/workflows/build.yml`: a cada push/PR gera `app-debug` + `app-release`.
-Se `secrets.GH_PAT` existir, o runner baixa o `default.xex`, valida `XEX2` e
-tenta o codegen; sem o secret, o build continua em modo runtime-only (verde).
+A release é **unsigned** (sem keystore commitado — assine com seus secrets
+para distribuir). Se `secrets.GH_PAT` existir, o runner baixa o `default.xex`,
+valida `XEX2` e tenta o codegen; sem o secret, o build continua em modo runtime-only (verde).
 Nada protegido é commitado; o `.xex` vive só no runner.
 
 Configure uma vez: Settings -> Secrets and variables -> Actions -> `GH_PAT`

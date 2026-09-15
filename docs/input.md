@@ -12,12 +12,16 @@ replace jump/attack buttons.
 
 ## Gamepad (`PadInputBridge`)
 
-Same driving model: left stick X = steering, LT/RT (or right-stick fallback)
-= brake/throttle, A = handbrake, X = camera, Y/RB = gear up, LB = gear down,
+Same driving model: left stick X = steering (0.08 deadzone, rescaled),
+LT/RT (RZ/Z fallback, right-stick-Y last resort) = brake/throttle,
+A or B = handbrake (FH2 has no nitro — `BTN_NITRO` is reserved, unmapped),
+X = camera, Y/RB = gear up, LB = gear down,
 Start = pause — matching the Xbox 360 mapping. USB + Bluetooth via
 `InputDevice.SOURCE_GAMEPAD/JOYSTICK`; triggers stay analog end-to-end.
 
 ## Native contract
 
-Both paths converge on `Input_Push(steer, thr, brk, buttons)` -> JNI
-`nativePushDrivingInput`, consumed by recompiled code via `Input_*01()`.
+Both paths converge on `Input_PushSource(slot, steer, thr, brk, buttons)`
+(`SRC_TOUCH` / `SRC_PAD`) — slots merge by recency with buttons OR'd, so a
+gamepad button tap never zeroes touch steering mid-corner (and vice-versa).
+Consumed by recompiled code via `Input_*01()`.
