@@ -48,12 +48,11 @@ jobs:
       # análise/recompilação offline. O APK final não o embute — o usuário
       # fornece os arquivos em runtime via SAF.
       - name: Baixar default.xex (repo privado, opcional)
-        if: ${{ secrets.GH_PAT != '' }}
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ]; then echo "GH_PAT vazio, pulando."; exit 0; fi
+          if [ -z "${GH_TOKEN:-}" ]; then echo "GH_PAT ausente, pulando download (build runtime-only)."; exit 0; fi
           curl -L --retry 3 --retry-delay 5 \
                -H "Authorization: token $GH_TOKEN" \
                -H "Accept: application/vnd.github.v3.raw" \
@@ -64,8 +63,8 @@ jobs:
           echo "default.xex OK: $(stat -c%s default.xex) bytes"
 
       - name: Tentar codegen XenonRecomp (não-bloqueante)
-        if: ${{ hashFiles('default.xex') != '' }}
         run: |
+          if [ ! -f default.xex ]; then echo "Sem default.xex — build runtime-only."; exit 0; fi
           set +e
           if [ -f ./tools/run_recomp.sh ]; then
             chmod +x ./tools/*.sh || true
