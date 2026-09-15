@@ -1,0 +1,58 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.deivid22srk.fh2recomp'
+    compileSdk 35
+    ndkVersion '27.2.12479018'
+
+    defaultConfig {
+        applicationId 'com.deivid22srk.fh2recomp'
+        minSdk 28
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+
+        // arm64-v8a only: recompiled PPC code, NEON paths and the
+        // Vulkan/GLES backends are tuned for 64-bit mobile GPUs.
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_shared', '-DCMAKE_BUILD_TYPE=Release'
+                cppFlags '-std=c++17'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.31.1'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            jniDebuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+}

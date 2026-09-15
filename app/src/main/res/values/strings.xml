@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FH2 Recompiled</string>
+    <string name="setup_title">Forza Horizon 2 — Recompiled para Android</string>
+    <string name="setup_desc">Este app não inclui o jogo. Selecione a pasta com os arquivos extraídos do seu Xbox 360 (media/, default.xex já recompilado no build ou fornecido via SAF).</string>
+    <string name="pick_folder">Selecionar pasta do jogo</string>
+    <string name="start_game">Iniciar jogo</string>
+    <string name="loading">Carregando…</string>
+    <string name="no_folder">Nenhuma pasta selecionada. O jogo precisa dos seus arquivos legais para rodar.</string>
+    <string name="copyright">Projeto educacional/homebrew, sem afiliação com Microsoft / Playground Games / Turn 10.</string>
+</resources>

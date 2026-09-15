@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Network is only used for optional update checks, never for game assets. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Read the user-picked game folder in place (no copy). -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Game controller support (USB/BT). -->
+    <uses-feature android:name="android.hardware.gamepad" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <!-- Vulkan is preferred, GLES 3.1+ is the guaranteed fallback. -->
+    <uses-feature
+        android:name="android.hardware.vulkan.version"
+        android:version="0x00400003"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.opengles.aep" android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:icon="@android:mipmap/sym_def_app_icon"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".SetupActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="true"
+            android:screenOrientation="sensorLandscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|density"
+            android:exported="false"
+            android:screenOrientation="sensorLandscape" />
+    </application>
+
+</manifest>
