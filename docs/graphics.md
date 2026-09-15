@@ -30,7 +30,27 @@ for reporting a backend that does not execute yet.
 - **Shader cache**: `ShaderCache_*` persists PSO/SPIR-V under app cache,
   capped, FNV-hashed keys — no per-launch recompile of FH2's 100s of variants.
 
+## Shader triage real (2026-09-15, `media/shaders`, 175 `.fxobj`)
+
+Containers Xenos escaneados e convertidos **um a um em processo isolado**
+(em vez do dir-mode tudo-ou-nada): 174 arquivos com containers → **2.918
+containers únicos → 2.463 HLSL (84,4%)**; **455 falham** com segfault —
+todos vertex-shaders (`kind 0x01`, concentrados em `Cars/`: rims,
+`shaders_16car_v16`, `shaders_slod_v16`).
+
+Causa raiz: `ShaderRecompiler::recompile(VertexFetchInstruction)` assume
+`vertexElements.find(address) != end()` via `assert` — em Release o assert
+some e vira segfault. Shaders de carro do FH2 usam vertex-fetch sem entrada
+de declaração correspondente (padrão que o Unleashed nunca teve). Trabalho
+title-specific: mapear essas decls ou emitir fallback — sem isso, carros
+não renderizam. Pixel-shaders convertem (amostra verificada: corpo HLSL
+válido com `oPos`/`oTexCoord`). HLSL gerado (41 MB) fica fora do git.
+
 ## Lifecycle (Android-only work)
+
+`surfaceCreated/Changed/Destroyed`, `onPause/Resume`, `onTrimMemory` all
+tear down / recreate EGL surfaces without leaking the context. Minimizing
+mid-race must not lose the device (desktop ports skip this entirely).
 
 `surfaceCreated/Changed/Destroyed`, `onPause/Resume`, `onTrimMemory` all
 tear down / recreate EGL surfaces without leaking the context. Minimizing

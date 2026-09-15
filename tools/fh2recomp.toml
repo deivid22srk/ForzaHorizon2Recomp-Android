@@ -1,17 +1,42 @@
 # fh2recomp.toml — XenonRecomp job for Forza Horizon 2 (Xbox 360 default.xex).
-# See https://github.com/hedge-dev/XenonRecomp — [main] paths are consumed by
-# XenonRecomp; [functions]/[invalid_instructions] are filled from analysis.
+# REAL config, validated offline 2026-09-15 against retail default.xex
+# (XEX2, 21807104 bytes, entry 0x82BF2CD0, base 0x82000000).
+# See docs/recomp.md "Resultados reais".
+#
+# Schema notes (hard-won, XenonRecomp parses strictly):
+# - ALL paths are relative to THIS file's directory (absolute paths break:
+#   directoryPath is prepended; an absolute file_path segfaults the tool on
+#   LoadFile failure — null deref in Image::ParseImage).
+# - functions/invalid_instructions are ARRAYS of {address=, size=} tables.
+
 [main]
 file_path = "../default.xex"
 out_directory_path = "../recomp/generated"
 switch_table_file_path = "recompiled_functions.toml"
 
-# Manual function-boundary stubs go here when XenonAnalyse cannot map a
-# function automatically. Document each with source address + reason.
-# Example:
-# [functions]
-# 0x82001234 = { name = "sub_82001234", size = 0x120 } # tail-call thunk, see docs/recomp.md
-[functions]
+# CRT save/restore thunk tables — found by retail-decrypt analysis:
+# AES-CBC (retail key) + BASIC decompress -> PE validate (.text =
+# 0x823F0000+0xF01AAC) -> fall-through table shape match + caller-count rank.
+# GPR tables use std/ld (64-bit) with LR in r12:
+#   save table 0x82C01080: std r14,-152(r1) ... stw r12,-8(r1); blr
+#   rest table 0x82C010D0: ld r14,-152(r1) ... lwz r12,-8(r1); mtlr r12; blr
+# FPR tables are r12-relative stfd/lfd runs of f14..f31 + blr:
+#   save table 0x82C015A0, rest table 0x82C015EC
+# VMX tables DO NOT EXIST in this binary (26 stvx / 27 lvx total, all inline)
+# -> vmx addresses stay 0 (recompiler skips them; ERROR lines are expected).
+restgprlr_14_address = 0x82C010D0
+savegprlr_14_address = 0x82C01080
+restfpr_14_address = 0x82C015EC
+savefpr_14_address = 0x82C015A0
 
-# Known-bad instruction ranges to skip (rare; prefer fixing the recompiler).
-[invalid_instructions]
+# Extra function boundaries (analyser misses). Format per recompiler_config.cpp
+# (TOML array of tables) — uncomment and fill with real findings only:
+#   [[main.functions]]
+#   address = 0x82XXXXXX
+#   size = 0xNNN
+
+# Known data-in-code ranges (recompiler reports "Unable to decode" there;
+# 7 instances at 0x832F1A78..0x832F1AA8 — jump-table data, harmless).
+[[main.invalid_instructions]]
+data = 0x832F1A78
+size = 0x30

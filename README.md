@@ -26,9 +26,14 @@ Xenos -> SPIR-V), com runtime **construído para Android desde a linha 1**
 ## Status honesto
 
 Scaffold **compilável que gera APK instalável em CI** (tela de setup + HUD +
-status nativo). Jogabilidade completa exige a recompilação do seu
-`default.xex` + cache SPIR-V (meses de trabalho title-specific, como todo
-projeto XenonRecomp) — ver `docs/backlog.md`. Sem ETA prometido.
+status nativo) **+ recompilação real já executada offline**: XenonRecomp
+completou 100% do `default.xex` retail (505 TUs, 266 MB, ~128,5 mil funções;
+amostra compila com clang++), com TOML manual real (4 tabelas CRT), catálogo
+de 64 mnemônicos não-implementados e inventário de 388 kernel-imports 100%
+mapeados; XenosRecomp converteu 84,4% dos 2.918 shaders únicos (vertex-fetch
+de carros pendente). Ver `docs/recomp.md` (números), `docs/backlog.md`
+(R-2 real) e `tools/imports_*.txt`. Jogabilidade completa exige o runtime
+desses imports + backend Vulkan/SPIR-V (R-3, G-1) — sem ETA prometido.
 
 ## Estrutura
 

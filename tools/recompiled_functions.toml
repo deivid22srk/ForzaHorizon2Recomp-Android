@@ -1,9 +1,26 @@
 # recompiled_functions.toml — XenonAnalyse jump-table output for FH2.
-# Committed as a bootstrap; the real file is regenerated offline from the
-# user's own default.xex via tools/run_analyse.sh and will be much larger.
-# Manual stubs (analyser misses) are appended under [functions] with comments.
+#
+# REAL RESULT (2026-09-15, retail default.xex, XenonAnalyse built from
+# hedge-dev/XenonRecomp): ZERO switch tables matched. Exit 0, output contains
+# only the section headers. FH2's compiler (newer Xbox XDK, LTCG) emits
+# switch/jump sequences that match none of XenonAnalyse's 4 hardcoded
+# patterns (absolute/computed/byte-offset/word-offset).
+#
+# Consequence: the recompiler ran WITHOUT switch tables and still completed
+# 100% (jump tables decoded as data-in-code instead — see the 7 "Unable to
+# decode" at 0x832F1A78.. in docs/recomp.md). Code correctness for
+# switch-heavy code (UI menus, state machines) needs MANUAL switch analysis:
+# disassemble computed jumps (mtctr/bctr clusters) and add entries here in
+# the tool's schema:
+#   [[switch]]
+#   base = 0x...
+#   r = ...
+#   default = 0x...
+#   labels = [ 0x..., ... ]
+
 [switch_tables]
-# populated by XenonAnalyse
+# populated by XenonAnalyse (empty for this binary — see note above)
 
 [functions]
-# 0xADDR = { name = "sub_ADDR" }  # reason + date, one line per stub
+# Manual stubs (analyser misses), one line per stub with reason + date:
+# 0xADDR = { name = "sub_ADDR" }  # reason

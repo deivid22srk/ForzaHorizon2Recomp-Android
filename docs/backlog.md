@@ -3,12 +3,95 @@
 Format: `ID — title (owner/area) — status`. File one GitHub issue per ID when
 the repo goes live; `unimpl` counters in-app (`unimpl_d3d9=N`) feed triage.
 
+## R-2 REAL — Unrecognized-instruction catalog (retail FH2 default.xex)
+
+4.249 instâncias, 64 mnemônicos, medidos no codegen de 2026-09-15 (100%).
+Cada linha vira issue com EA de exemplo do log. (Log completo: 266 MB de
+codegen local, fora do git.)
+
+| # | mnemônico | ocorrências | classe |
+|---|-----------|-------------|--------|
+| 1 | stfsu | 865 | update-form float store |
+| 2 | bdzf | 695 | decrement-and-branch |
+| 3 | lfsu | 441 | update-form float load |
+| 4 | sthu | 364 | update-form half store |
+| 5 | lhzu | 224 | update-form half load |
+| 6 | vsel128 | 147 | VMX128 select |
+| 7 | eqv | 134 | equivalence |
+| 8 | subfze | 106 | subtract-extended |
+| 9 | lfsux | 78 | indexed update float load |
+| 10 | bso | 65 | branch-on-overflow |
+| 11 | stvlxl128 | 64 | VMX128 store |
+| 12 | lvxl128 | 64 | VMX128 load |
+| 13 | vaddsws | 63 | VMX128 saturating add |
+| 14 | vpkswss128 | 62 | VMX128 pack |
+| 15 | vslo128 | 60 | VMX128 shift-left-octet |
+| 16 | vminub | 59 | VMX128 min |
+| 17 | vsro128 | 57 | VMX128 shift-right-octet |
+| 18 | vmaxub | 55 | VMX128 max |
+| 19 | addc | 46 | add-carrying |
+| 20 | sthux | 45 | indexed update half store |
+| 21 | lhzux | 44 | indexed update half load |
+| 22 | vmaxuh | 36 | VMX128 max half |
+| 23 | vsrb | 35 | VMX128 shift-right-byte |
+| 24 | addme | 32 | add-minus-one-extended |
+| 25 | vpkuwum128 | 28 | VMX128 pack |
+| 26 | vminuh | 28 | VMX128 min half |
+| 27 | vcfpuxws128 | 28 | VMX128 convert |
+| 28 | stfsux | 26 | indexed update float store |
+| 29 | vaddsbs | 25 | VMX128 saturating add byte |
+| 30 | vsubuwm | 24 | VMX128 subtract |
+| 31 | vslo | 24 | VMX128 shift-left-octet |
+| 32 | vsl | 24 | VMX128 shift-left |
+| 33 | vrlh | 18 | VMX128 rotate half |
+| 34 | vrlw128 | 15 | VMX128 rotate word |
+| 35 | lbzux | 14 | indexed update byte load |
+| 36 | vpkuhum128 | 13 | VMX128 pack |
+| 37 | stbux | 13 | indexed update byte store |
+| 38 | lhau | 13 | update algebraic half load |
+| 39 | vsubuws | 12 | VMX128 subtract saturate |
+| 40 | vcmpequh | 12 | VMX128 compare |
+| 41 | lfdu | 9 | update double load |
+| 42 | vminuw | 8 | VMX128 min word |
+| 43 | vnor128 | 7 | VMX128 nor |
+| 44 | lwzux | 7 | indexed update word load |
+| 45 | vctuxs | 6 | VMX128 convert |
+| 46 | stfdu | 6 | update double store |
+| 47 | bns | 6 | branch-if-not-summary |
+| 48 | vpkuwus128 | 5 | VMX128 pack saturate |
+| 49 | stdux | 5 | indexed update dword store |
+| 50 | vpkshss128 | 4 | VMX128 pack |
+| 51 | lvehx | 4 | VMX load element |
+| 52 | frsqrte | 4 | FP reciprocal-sqrt estimate |
+| 53 | mullhwu | 3 | multiply-high |
+| 54 | vsrh | 2 | VMX128 shift-right half |
+| 55 | vspltish | 2 | VMX128 splat |
+| 56 | vslh | 2 | VMX128 shift-left half |
+| 57 | vcmpgtuw | 2 | VMX128 compare |
+| 58 | ldux | 2 | indexed update dword load |
+| 59 | bdnzt | 2 | decrement-branch |
+| 60 | vpkuhus128 | 1 | VMX128 pack |
+| 61 | vcmpgtsb | 1 | VMX128 compare |
+| 62 | vandc | 1 | VMX128 and-complement |
+| 63 | lhbrx | 1 | indexed byte-reverse load |
+| 64 | dcbst | 1 | data-cache-store |
+| + | data-in-code | 7 × `Unable to decode` @0x832F1A78+ | jump-table bytes (TOML) |
+
+Leitura: o grosso (linhas 1–5, 9, 20–21, 28, 35–38, 44, 49, 58) são formas
+*update/indexed* de load/store —tradução C++ direta, baixo risco. O bloco
+VMX128 (linhas 6, 11–18, 22–33, 39–40, 42–43, 45, 48, 50–51, 54–57, 60–62) é
+emitido como scalar fallback hoje (correto, lento) — otimizar depois com
+NEON. `bdzf/bso/bns/bdnzt` (2, 10, 47, 59) afetam loops/branches — prioridade
+de corretude. Sem essas implementações o jogo não passa do boot real (R-3).
+
 ## Recompilation
 
-- R-1 — XenonAnalyse full-toml from retail FH2 default.xex — **open**
-  (bootstrap TOML committed; needs retail run, stub docs per function).
-- R-2 — `Unimplemented instruction` catalog (per-mnemonic issues) — **open**.
-- R-3 — Patched XEXP path (title update) if retail needs TU — **open**.
+- R-1 — XenonAnalyse full-toml from retail FH2 default.xex — **done**
+  (resultado real: 0 tabelas; switches exigem análise manual — G-6).
+- R-2 — `Unimplemented instruction` catalog — **done (tabela acima)**.
+- R-3 — Boot real do codegen (kernel-import runtime p/ 388 imports) — **open**
+  (inventário 100% mapeado: `tools/imports_xboxkrnl.txt` 206 + `tools/imports_xam.txt` 182).
+- R-4 — Patched XEXP path (title update) — **open** (só base analisada).
 
 ## GPU
 
@@ -19,6 +102,7 @@ the repo goes live; `unimpl` counters in-app (`unimpl_d3d9=N`) feed triage.
   (config exists, guest hooks pending; values stored, not dropped).
 - G-4 — Full SPIR-V cache import from XenosRecomp (media/shaders/*) — **open**.
 - G-5 — Dynamic-resolution FBO (scale applies to geometry; full clear meanwhile) — **open**.
+- G-6 — Manual switch-table analysis (XenonAnalyse: 0 tabelas p/ este binário) — **open**.
 
 ## Audio / Input / Platform
 
