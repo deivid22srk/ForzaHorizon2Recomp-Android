@@ -3,15 +3,30 @@
 #include <cstdio>
 #include <cstring>
 #include <mutex>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <unordered_map>
 
 namespace fh2 {
 namespace {
 std::string g_dir;
+bool g_init = false;
 size_t g_max = 256 * 1024 * 1024;
 std::mutex g_mu;
 std::unordered_map<uint64_t, std::vector<uint8_t>> g_mem;
 size_t g_bytes = 0;
+
+// mkdir -p equivalent (cache dir may not exist on first launch).
+static void mkdirs(const std::string& path) {
+    if (path.empty()) return;
+    std::string cur;
+    for (size_t i = 0; i < path.size(); i++) {
+        cur += path[i];
+        if (path[i] == '/' && cur.size() > 1) ::mkdir(cur.c_str(), 0755);
+    }
+    ::mkdir(path.c_str(), 0755);
+}
 
 std::string path_for(uint64_t key) {
     char b[64];
@@ -22,13 +37,21 @@ std::string path_for(uint64_t key) {
 
 void ShaderCache_Init(const std::string& cache_dir, size_t max_mb) {
     std::lock_guard<std::mutex> l(g_mu);
+    if (g_init && g_dir == cache_dir) return; // single owner (see fh2_jni)
     g_dir = cache_dir; g_max = max_mb * 1024 * 1024;
     g_mem.clear(); g_bytes = 0;
+    mkdirs(g_dir);
+    g_init = true;
 }
 
 void ShaderCache_Shutdown() {
     std::lock_guard<std::mutex> l(g_mu);
-    g_mem.clear(); g_bytes = 0;
+    g_mem.clear(); g_bytes = 0; g_init = false;
+}
+
+bool ShaderCache_IsInit() {
+    std::lock_guard<std::mutex> l(g_mu);
+    return g_init;
 }
 
 uint64_t ShaderCache_Hash(const void* data, size_t size) {
@@ -65,7 +88,7 @@ void ShaderCache_Store(uint64_t key, const void* data, size_t size) {
     g_mem[key] = v; g_bytes += size;
     if (!g_dir.empty()) {
         FILE* f = fopen(path_for(key).c_str(), "wb");
-        if (f) { fwrite(data, 1, size, f); fclose(f); }
+        if (f) { fwrite(data, 1, size, f); fflush(f); fsync(fileno(f)); fclose(f); }
     }
 }
 

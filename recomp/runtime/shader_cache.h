@@ -9,6 +9,7 @@ namespace fh2 {
 
 void ShaderCache_Init(const std::string& cache_dir, size_t max_mb);
 void ShaderCache_Shutdown();
+bool ShaderCache_IsInit();
 // Returns true on hit (out filled). Miss => caller compiles then Stores.
 bool ShaderCache_Lookup(uint64_t key, std::vector<uint8_t>* out);
 void ShaderCache_Store(uint64_t key, const void* data, size_t size);
