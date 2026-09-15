@@ -50,3 +50,7 @@ keystore.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# Host boot harness build output
+harness/obj/
+harness/fh2boot
