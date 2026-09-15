@@ -1,0 +1,17 @@
+# fh2recomp.toml — XenonRecomp job for Forza Horizon 2 (Xbox 360 default.xex).
+# See https://github.com/hedge-dev/XenonRecomp — [main] paths are consumed by
+# XenonRecomp; [functions]/[invalid_instructions] are filled from analysis.
+[main]
+file_path = "../default.xex"
+out_directory_path = "../recomp/generated"
+switch_table_file_path = "recompiled_functions.toml"
+
+# Manual function-boundary stubs go here when XenonAnalyse cannot map a
+# function automatically. Document each with source address + reason.
+# Example:
+# [functions]
+# 0x82001234 = { name = "sub_82001234", size = 0x120 } # tail-call thunk, see docs/recomp.md
+[functions]
+
+# Known-bad instruction ranges to skip (rare; prefer fixing the recompiler).
+[invalid_instructions]

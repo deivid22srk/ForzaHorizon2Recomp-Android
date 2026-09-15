@@ -1,0 +1,9 @@
+# recompiled_functions.toml — XenonAnalyse jump-table output for FH2.
+# Committed as a bootstrap; the real file is regenerated offline from the
+# user's own default.xex via tools/run_analyse.sh and will be much larger.
+# Manual stubs (analyser misses) are appended under [functions] with comments.
+[switch_tables]
+# populated by XenonAnalyse
+
+[functions]
+# 0xADDR = { name = "sub_ADDR" }  # reason + date, one line per stub
