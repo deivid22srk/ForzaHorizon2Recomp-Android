@@ -1,0 +1,4 @@
+# Placeholder: replaced by tools/run_recomp.sh with the real file list.
+# Kept empty (but present) so `include()` succeeds if a stale checkout
+# references it directly.
+set(FH2_GENERATED_SOURCES "")

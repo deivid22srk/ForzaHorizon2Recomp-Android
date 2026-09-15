@@ -1,0 +1,7 @@
+# Generated recomp output is too large for git and contains game-derived code.
+# The OFFLINE recompiler output stays local; CI regenerates it when GH_PAT is set.
+*.cpp
+*.h
+!README.md
+!*.example
+*.o
