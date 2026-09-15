@@ -4,7 +4,10 @@
 # Never hardcode tokens; CI passes GH_PAT via secrets.GH_PAT.
 set -euo pipefail
 OUT="${1:-./default.xex}"
-URL="https://github.com/deivid22srk/forza-horizon-2-xex/raw/refs/heads/main/default.xex"
+# NOTE: the /raw/refs/heads/... github.com form returns 404 for private repos;
+# raw.githubusercontent.com with the token header is the working form
+# (validated: XEX2 magic, 21807104 bytes).
+URL="https://raw.githubusercontent.com/deivid22srk/forza-horizon-2-xex/main/default.xex"
 
 if [[ -z "${GH_TOKEN:-}" ]]; then
   echo "ERROR: GH_TOKEN is not set. Export a PAT with Contents:Read on forza-horizon-2-xex." >&2

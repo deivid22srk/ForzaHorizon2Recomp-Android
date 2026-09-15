@@ -56,7 +56,7 @@ jobs:
                -H "Authorization: token $GH_TOKEN" \
                -H "Accept: application/vnd.github.v3.raw" \
                -o default.xex \
-               "https://github.com/deivid22srk/forza-horizon-2-xex/raw/refs/heads/main/default.xex"
+               "https://raw.githubusercontent.com/deivid22srk/forza-horizon-2-xex/main/default.xex"
           test -s default.xex || (echo "default.xex vazio/ausente" && exit 1)
           head -c 4 default.xex | grep -q "XEX2" || (echo "Magic XEX2 inválido" && exit 1)
           echo "default.xex OK: $(stat -c%s default.xex) bytes"
