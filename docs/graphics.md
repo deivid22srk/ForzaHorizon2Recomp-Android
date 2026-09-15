@@ -41,10 +41,13 @@ todos vertex-shaders (`kind 0x01`, concentrados em `Cars/`: rims,
 Causa raiz: `ShaderRecompiler::recompile(VertexFetchInstruction)` assume
 `vertexElements.find(address) != end()` via `assert` — em Release o assert
 some e vira segfault. Shaders de carro do FH2 usam vertex-fetch sem entrada
-de declaração correspondente (padrão que o Unleashed nunca teve). Trabalho
-title-specific: mapear essas decls ou emitir fallback — sem isso, carros
-não renderizam. Pixel-shaders convertem (amostra verificada: corpo HLSL
-válido com `oPos`/`oTexCoord`). HLSL gerado (41 MB) fica fora do git.
+de declaração correspondente (padrão que o Unleashed nunca teve). 204 HLSL
+adicionais exigem prelude Unleashed (`b129…`, `cubeMapData`) e falham no DXC
+(gap G-4b). Pipeline completo medido: **2.918 containers → 2.463 HLSL
+(84,4%) → 2.259 SPIR-V válidos via `dxc-linux -spirv` (77,4%)**, 27 MB,
+chaveados por FNV-1a e importáveis por `xenos::ImportDir` (pasta
+`spv_cache` no app). Evidência e lista de falhas: `tools/evidence_fh2.md`,
+`tools/shader_failures.csv`.
 
 ## Lifecycle (Android-only work)
 

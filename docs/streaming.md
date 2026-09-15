@@ -10,7 +10,8 @@ land (R-1) — reported honestly, not estimated.
 
 ## Budgets (`fh2_config.h`)
 
-- Guest XEX window: 256 MB reserved (malloc, zeroed).
+- Guest XEX window: 256 MB reserved (`mmap(MAP_ANONYMOUS)`, zero-fill sem
+  stall de `memset`; fallback `malloc` só fora do Android).
 - Tile ring: 128 MB, LOD 0/1/2 selected by `Streaming_Update(x,y,z,speed,draw)`.
 - Shader disk cache: 256 MB cap.
 - Workers: min(4, cpu_count) — scaled at runtime, never desktop-sized pools.

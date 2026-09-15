@@ -33,6 +33,12 @@ media/
 audio/
 cars/
 *.zip
+# Game-derived build artifacts (local codegen/shader triage only)
+*.fxobj
+*.hlsl
+*.spv
+*.spvmap
+*.bin
 
 # Secrets — use GitHub Actions secrets, never files
 *.jks

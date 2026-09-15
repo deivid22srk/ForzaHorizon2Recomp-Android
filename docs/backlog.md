@@ -100,7 +100,10 @@ de corretude. Sem essas implementações o jogo não passa do boot real (R-3).
 - G-2 — Material batching for PBR car shaders — **open**.
 - G-3 — Reflection-probe + cascade-shadow scalers wired to settings — **partial**
   (config exists, guest hooks pending; values stored, not dropped).
-- G-4 — Full SPIR-V cache import from XenosRecomp (media/shaders/*) — **open**.
+- G-4 — Full SPIR-V cache import from XenosRecomp (media/shaders/*) — **partial**
+  (2.259/2.918 SPIR-V válidos offline + `xenos::ImportDir` implementado;
+  faltam: 455 vertex-fetch (root-cause no assert) + 204 com prelude
+  Unleashed `b129/cubeMapData` — gap G-4b).
 - G-5 — Dynamic-resolution FBO (scale applies to geometry; full clear meanwhile) — **open**.
 - G-6 — Manual switch-table analysis (XenonAnalyse: 0 tabelas p/ este binário) — **open**.
 

@@ -19,6 +19,8 @@ public final class NativeBridge {
     public static native void nativeSetShadowQuality(int q);
     /** Marks a content:// tree as validated by Java (DocumentsContract). */
     public static native void nativeSetAssetValidated(boolean ok, String label);
+    /** Bulk-imports "<fnv-hex>.spv" files built offline (XenosRecomp+DXC). */
+    public static native int nativeImportShaderCache(String dir);
     public static native void nativeOnSurfaceCreated(Object surface);
     public static native void nativeOnSurfaceChanged(int w, int h);
     public static native void nativeOnSurfaceDestroyed();

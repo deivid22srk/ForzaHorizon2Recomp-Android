@@ -77,6 +77,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
             // Java-side validation; native cannot stat it).
             String label = GameFiles.validateTree(this, treeUri != null ? treeUri : gamePath);
             NativeBridge.nativeSetAssetValidated(label != null, label != null ? label : "");
+            // Offline SPIR-V cache (user-provided <files>/spv_cache/*.spv).
+            // File I/O off the UI thread; status line picks up the new count.
+            final java.io.File spvDir = new java.io.File(getFilesDir(), "spv_cache");
+            if (spvDir.isDirectory()) {
+                new Thread(() -> {
+                    try { NativeBridge.nativeImportShaderCache(spvDir.getAbsolutePath()); }
+                    catch (Throwable ignored) {}
+                }).start();
+            }
         } catch (UnsatisfiedLinkError e) {
             statusView.setText("Native lib ausente: " + e.getMessage());
         }

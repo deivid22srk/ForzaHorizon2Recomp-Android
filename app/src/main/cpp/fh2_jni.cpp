@@ -132,6 +132,9 @@ JNIEXPORT void JNICALL Java_com_deivid22srk_fh2recomp_NativeBridge_nativeSetShad
 JNIEXPORT void JNICALL Java_com_deivid22srk_fh2recomp_NativeBridge_nativeSetAssetValidated(JNIEnv* env, jclass, jboolean ok, jstring label) {
     fh2::FS_SetTreeValidated(ok == JNI_TRUE, jstr(env, label));
 }
+JNIEXPORT jint JNICALL Java_com_deivid22srk_fh2recomp_NativeBridge_nativeImportShaderCache(JNIEnv* env, jclass, jstring dir) {
+    return (jint)fh2::xenos::ImportDir(jstr(env, dir));
+}
 
 JNIEXPORT void JNICALL Java_com_deivid22srk_fh2recomp_NativeBridge_nativeOnSurfaceCreated(JNIEnv* env, jclass, jobject surf) {
     std::lock_guard<std::mutex> l(g_mu);

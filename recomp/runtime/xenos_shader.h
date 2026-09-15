@@ -16,6 +16,11 @@ void Shutdown();
 bool GetSpirv(const void* microcode, size_t size, std::vector<uint8_t>* spirv_out);
 // Called by the offline XenosRecomp cache importer.
 void ImportPrecompiled(uint64_t key, const void* spirv, size_t size);
+// Bulk-import a directory of "<fnv-hex>.spv" files produced offline by
+// tools (XenosRecomp HLSL -> DXC -spirv, keyed by ShaderCache_Hash of the
+// Xenos microcode). Returns number of shaders imported. Files live outside
+// the APK (user-provided, like all game data).
+size_t ImportDir(const std::string& dir);
 const char* Status();
 
 } // namespace fh2::xenos
